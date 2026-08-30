@@ -106,6 +106,7 @@ public sealed class InstallationService
             var operations = BuildOperations(settings, release, feederFiles, immerse);
 
             Directory.CreateDirectory(backupDirectory);
+            await SaveManifestAsync(GetManifestPath(gameDirectory), manifest, cancellationToken);
 
             foreach (var operation in operations)
             {
@@ -126,11 +127,15 @@ public sealed class InstallationService
                 }
 
                 manifest.Files.Add(entry);
+                await SaveManifestAsync(GetManifestPath(gameDirectory), manifest, cancellationToken);
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-                File.Copy(operation.Source, destination, true);
+                if (!string.Equals(
+                        Path.GetFullPath(operation.Source),
+                        destination,
+                        StringComparison.OrdinalIgnoreCase))
+                    File.Copy(operation.Source, destination, true);
             }
 
-            await SaveManifestAsync(GetManifestPath(gameDirectory), manifest, cancellationToken);
             return OperationResult.Ok(
                 "Installation completed.",
                 profile is null ? "Generic experimental mode" : profile.Name,
@@ -318,8 +323,10 @@ public sealed class InstallationService
         CancellationToken cancellationToken)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        await using var stream = File.Create(path);
-        await JsonSerializer.SerializeAsync(stream, manifest, JsonOptions, cancellationToken);
+        var temporaryPath = path + ".tmp";
+        await using (var stream = File.Create(temporaryPath))
+            await JsonSerializer.SerializeAsync(stream, manifest, JsonOptions, cancellationToken);
+        File.Move(temporaryPath, path, true);
     }
 
     private static async Task<string> ReadSharedTextAsync(string path, CancellationToken cancellationToken)
