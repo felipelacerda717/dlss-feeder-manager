@@ -12,6 +12,7 @@ public partial class MainWindow : Window
     private readonly SettingsStore _settingsStore = new();
     private readonly ProfileCatalogService _profiles = new();
     private readonly SourceCatalogService _sources = new();
+    private readonly UpdateService _updates = new();
     private readonly InstallationService _installer;
     private AppSettings _settings = new();
 
@@ -19,6 +20,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _installer = new InstallationService(_profiles, _sources, new FeederDownloader());
+        VersionText.Text = $"v{AppVersion.Current}";
         Loaded += Window_Loaded;
     }
 
@@ -99,6 +101,51 @@ public partial class MainWindow : Window
 
     private void OpenProject_Click(object sender, RoutedEventArgs e) =>
         OpenUrl("https://github.com/felipelacerda717/dlss-feeder-manager");
+
+    private async void CheckUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        SetBusy(true, "Checking for updates");
+        try
+        {
+            var release = await _updates.FindUpdateAsync();
+            if (release is null)
+            {
+                ShowResult(OperationResult.Ok("No newer compatible release was found.", $"Installed version: {AppVersion.Current}"));
+                return;
+            }
+
+            var notes = string.IsNullOrWhiteSpace(release.Notes) ? "No release notes." : release.Notes.Trim();
+            if (notes.Length > 3500)
+                notes = notes[..3500] + Environment.NewLine + "…";
+
+            var answer = MessageBox.Show(
+                this,
+                $"Version {release.Version} is available.\n\n{notes}\n\nDownload, verify, and install it now?",
+                "DLSS Feeder Manager update",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+            if (answer != MessageBoxResult.Yes)
+            {
+                ShowResult(OperationResult.Ok("Update canceled.", $"Available version: {release.Version}"));
+                return;
+            }
+
+            StatusTitle.Text = "Downloading update...";
+            StatusBox.Text = "The downloaded executable will be verified before anything is replaced.";
+            var updatePath = await _updates.DownloadAsync(release);
+            var currentPath = Environment.ProcessPath ?? throw new InvalidOperationException("The current executable path is unavailable.");
+            UpdateBootstrap.Start(updatePath, currentPath);
+            Application.Current.Shutdown();
+        }
+        catch (Exception exception)
+        {
+            ShowResult(OperationResult.Fail("The update could not be installed.", exception.Message));
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+    }
 
     private async void Check_Click(object sender, RoutedEventArgs e)
     {
@@ -200,6 +247,7 @@ public partial class MainWindow : Window
     private void SetBusy(bool busy, string? title = null)
     {
         ActionPanel.IsEnabled = !busy;
+        UpdateButton.IsEnabled = !busy;
         if (busy && title is not null)
         {
             StatusTitle.Text = title + "...";

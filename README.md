@@ -136,7 +136,15 @@ Launch the game, enable the required ReShade techniques and add-ons, enter gamep
 
 ## Updating
 
-There is no self-updater yet. Test builds are currently produced by [GitHub Actions](https://github.com/felipelacerda717/dlss-feeder-manager/actions). A verified, user-confirmed portable updater is tracked in [issue #5](https://github.com/felipelacerda717/dlss-feeder-manager/issues/5).
+- [ ] Close the game before updating the manager.
+- [ ] Click **Check for updates** in the lower-right corner.
+- [ ] Read the release notes and confirm the update.
+- [ ] Wait while the new executable and its SHA-256 file are downloaded from the official GitHub Release.
+- [ ] Allow the manager to restart.
+
+The updater is manual and never installs silently. It verifies the release SHA-256 before closing the current version, keeps the previous executable during the first launch, and restores it if the new build cannot finish starting. It updates only `DLSSFeederManager.exe`; game files and selected components are not changed.
+
+If the executable is in a folder your Windows account cannot modify, move it to a user-owned folder before updating. The manager does not request administrator rights.
 
 ## Project status
 
@@ -145,11 +153,11 @@ There is no self-updater yet. Test builds are currently produced by [GitHub Acti
 - [x] Backup, rollback, validation, removal, and restoration
 - [x] MGS4 data-driven profile
 - [x] Death of the Outsider profile targeting `Dishonored_DO.exe`
+- [x] Verified, user-confirmed portable updater
 - [ ] Complete MGS4 manager test
 - [ ] Complete Death of the Outsider removal and reinstall test
 - [ ] Improve guided onboarding and diagnostics
-- [ ] Publish versioned GitHub Releases
-- [ ] Add the portable self-updater
+- [ ] Publish the first versioned GitHub Release
 
 See the [v0.1.0 checklist](https://github.com/felipelacerda717/dlss-feeder-manager/issues/1), [v0.2.0 checklist](https://github.com/felipelacerda717/dlss-feeder-manager/issues/5), [maintainer safety checklist](docs/MAINTAINING.md), and [roadmap](docs/ROADMAP.md).
 
