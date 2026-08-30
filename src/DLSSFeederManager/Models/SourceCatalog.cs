@@ -15,7 +15,6 @@ public sealed class FeederRelease
 public sealed class DownloadFile
 {
     public string Name { get; set; } = "";
-    public string Url { get; set; } = "";
     public string Sha256 { get; set; } = "";
     public string Destination { get; set; } = "";
 }
