@@ -1,0 +1,6 @@
+# Preserve exact bytes for the embedded known-good shader so its pinned SHA-256
+# is identical on Windows checkouts and inside the published executable.
+src/DLSSFeederManager/Assets/EmbeddedFeeder/DLSS5_Feed.fx -text
+
+# Base64 payload chunks must never be line-ending converted.
+src/DLSSFeederManager/Assets/EmbeddedFeeder/dlss5-feed.addon64.gz.b64.part* -text

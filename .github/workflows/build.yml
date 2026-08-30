@@ -17,6 +17,46 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+      - name: Verify embedded DLSS5-Feeder payload
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = 'src/DLSSFeederManager/Assets/EmbeddedFeeder'
+          $expectedShader = '2dca9659c9e44ab05d29b2ebf20c5d6414c6de8b57f506bf4d52fa9c556a8943'
+          $expectedAddon = '6ea59b3237ed9f1e2bdc6e258518347ccb7e03dfdc2f96fc08addc8974527dad'
+
+          $shaderHash = (Get-FileHash (Join-Path $root 'DLSS5_Feed.fx') -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($shaderHash -ne $expectedShader) {
+            throw "Embedded DLSS5_Feed.fx hash mismatch: $shaderHash"
+          }
+
+          $parts = Get-ChildItem (Join-Path $root 'dlss5-feed.addon64.gz.b64.part*') | Sort-Object Name
+          if ($parts.Count -eq 0) {
+            throw 'Embedded dlss5-feed.addon64 payload parts are missing.'
+          }
+
+          $base64 = ($parts | ForEach-Object { (Get-Content $_.FullName -Raw).Trim() }) -join ''
+          [byte[]]$compressed = [Convert]::FromBase64String($base64)
+          $input = [IO.MemoryStream]::new($compressed, $false)
+          $gzip = [IO.Compression.GZipStream]::new($input, [IO.Compression.CompressionMode]::Decompress)
+          $output = [IO.MemoryStream]::new()
+          try {
+            $gzip.CopyTo($output)
+            $addonPath = Join-Path $env:RUNNER_TEMP 'dlss5-feed.addon64'
+            [IO.File]::WriteAllBytes($addonPath, $output.ToArray())
+          }
+          finally {
+            $output.Dispose()
+            $gzip.Dispose()
+            $input.Dispose()
+          }
+
+          $addonHash = (Get-FileHash $addonPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($addonHash -ne $expectedAddon) {
+            throw "Embedded dlss5-feed.addon64 hash mismatch: $addonHash"
+          }
+
+          Write-Host "Embedded feeder payload verified."
       - run: dotnet restore DLSSFeederManager.sln
       - run: dotnet build DLSSFeederManager.sln -c Release --no-restore
       - run: dotnet publish src/DLSSFeederManager/DLSSFeederManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/win-x64
