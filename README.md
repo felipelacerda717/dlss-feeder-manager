@@ -3,7 +3,7 @@
 A Windows manager for applying, validating, and removing DLSS5-Feeder setups.
 
 > [!IMPORTANT]
-> This project is in early development. No usable release is available yet.
+> This project is in early development. The first alpha build is ready for installation and removal testing.
 
 ## Scope
 
@@ -33,15 +33,15 @@ See the [component acquisition policy](docs/SOURCES.md) for upstream repositorie
 - Direct3D 11 or Direct3D 12;
 - ReShade 6.8 or newer with add-on support;
 - working ReShade depth buffer;
-- iMMERSE LaunchPad motion vectors.
+- iMMERSE LaunchPad motion vectors. After downloading iMMERSE, select its ZIP or the file usually found at `iMMERSE-main/Shaders/MartysMods_LAUNCHPAD.fx`.
 
-DirectX 9, DirectX 10, Vulkan, and 32-bit games are outside the supported scope of DLSS5-Feeder.
+DirectX 9, DirectX 10, Vulkan, and 32-bit games are outside the manager's initial supported scope.
 
 ## Compatibility
 
 | Game | Manual setup | Manager profile |
 | --- | --- | --- |
-| Metal Gear Solid 4 | Confirmed | In progress |
+| Metal Gear Solid 4 | Confirmed | Implemented, runtime test pending |
 
 Unlisted games can use the generic mode, but remain experimental until their complete flow is tested.
 

@@ -142,8 +142,9 @@ public sealed class InstallationService
                 $"DLSS5-Feeder v{release.Version}",
                 $"{manifest.Files.Count} files installed",
                 "Open the ReShade overlay with Home.",
-                "Enable MartysMods_Launchpad, then enable DLSS 5 Feed below it.",
-                "Enable neural rendering in the DLSS 5 Neural Rendering panel.",
+                "On Home, enable iMMERSE: Launchpad and move it above DLSS 5 Feed.",
+                "On Add-ons, enable DLSS 5 Feed and DLSS 5 Neural Rendering.",
+                "In DLSS 5 Neural Rendering, enable DLSS Neural Rendering and Upscaling.",
                 "Keep MSAA and SSAA disabled, launch gameplay, then run Validate.");
         }
         catch (Exception exception)
