@@ -28,6 +28,8 @@ The current manager build installs only the tested 64-bit Direct3D 11 and Direct
 
 The latest upstream DLSS5-Feeder has separate beta paths for D3D9 through dgVoodoo2, Vulkan, and 32-bit games. This manager does not download or configure those newer paths yet, so their presence upstream must not be interpreted as support here.
 
+The upstream v0.6 beta and the required per-API installation designs are tracked in [compatibility expansion](docs/COMPATIBILITY_EXPANSION.md). Existing profiles remain pinned until the new motion-vector and transport paths pass complete game tests.
+
 ## Before you start
 
 - [ ] Windows 10 or 11
