@@ -54,6 +54,7 @@ jobs:
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           flags=(--generate-notes)
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then flags+=(--prerelease); fi
