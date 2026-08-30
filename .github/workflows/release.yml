@@ -5,32 +5,56 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  build:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-      - run: dotnet restore DLSSFeederManager.sln
-      - run: dotnet publish src/DLSSFeederManager/DLSSFeederManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/win-x64 --no-restore
-      - name: Verify tag and prepare assets
+      - name: Verify release source
         shell: pwsh
         run: |
+          git fetch origin main
+          git merge-base --is-ancestor $env:GITHUB_SHA origin/main
+          if ($LASTEXITCODE -ne 0) { throw 'Release tags must point to main' }
           $project = [xml](Get-Content src/DLSSFeederManager/DLSSFeederManager.csproj)
           $version = $project.Project.PropertyGroup.Version
           if ("v$version" -ne $env:GITHUB_REF_NAME) { throw "Tag $env:GITHUB_REF_NAME does not match project version $version" }
+      - run: dotnet restore DLSSFeederManager.sln
+      - run: dotnet publish src/DLSSFeederManager/DLSSFeederManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/win-x64 --no-restore
+      - name: Prepare assets
+        shell: pwsh
+        run: |
           $path = 'artifacts/win-x64/DLSSFeederManager.exe'
           $hash = (Get-FileHash $path -Algorithm SHA256).Hash.ToLowerInvariant()
           "$hash  DLSSFeederManager.exe" | Set-Content "$path.sha256" -Encoding ascii -NoNewline
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: |
+            artifacts/win-x64/DLSSFeederManager.exe
+            artifacts/win-x64/DLSSFeederManager.exe.sha256
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: artifacts
       - name: Publish GitHub Release
-        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $flags = @('--generate-notes')
-          if ($env:GITHUB_REF_NAME.Contains('-')) { $flags += '--prerelease' }
-          gh release create $env:GITHUB_REF_NAME artifacts/win-x64/DLSSFeederManager.exe artifacts/win-x64/DLSSFeederManager.exe.sha256 --title $env:GITHUB_REF_NAME @flags
+          flags=(--generate-notes)
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" artifacts/DLSSFeederManager.exe artifacts/DLSSFeederManager.exe.sha256 --title "$GITHUB_REF_NAME" "${flags[@]}"
