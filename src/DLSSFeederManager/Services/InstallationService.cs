@@ -140,7 +140,11 @@ public sealed class InstallationService
                 "Installation completed.",
                 profile is null ? "Generic experimental mode" : profile.Name,
                 $"DLSS5-Feeder v{release.Version}",
-                $"{manifest.Files.Count} files installed");
+                $"{manifest.Files.Count} files installed",
+                "Open the ReShade overlay with Home.",
+                "Enable MartysMods_Launchpad, then enable DLSS 5 Feed below it.",
+                "Enable neural rendering in the DLSS 5 Neural Rendering panel.",
+                "Keep MSAA and SSAA disabled, launch gameplay, then run Validate.");
         }
         catch (Exception exception)
         {
