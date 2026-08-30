@@ -9,7 +9,7 @@ A portable Windows manager for installing, validating, and safely removing [DLSS
 
 - checks the selected game executable and ReShade installation;
 - supports verified game profiles and an experimental generic mode;
-- downloads the profile's pinned DLSS5-Feeder files and verifies SHA-256 hashes;
+- carries a known-good DLSS5-Feeder pair inside the application and verifies its SHA-256 before installation;
 - installs user-supplied iMMERSE, RenoDX, and NVIDIA runtime files;
 - preserves selected filenames, including names such as `renodx-dlss5 (1).addon64`;
 - backs up every overwritten file;
@@ -26,9 +26,9 @@ The current manager build installs only the tested 64-bit Direct3D 11 and Direct
 | Direct3D 10 | Not supported |
 | Vulkan | Not supported |
 
-The latest upstream DLSS5-Feeder has separate beta paths for D3D9 through dgVoodoo2, Vulkan, and 32-bit games. This manager does not download or configure those newer paths yet, so their presence upstream must not be interpreted as support here.
+The latest upstream DLSS5-Feeder has separate beta paths for D3D9 through dgVoodoo2, Vulkan, and 32-bit games. This manager does not configure those newer paths yet, so their presence upstream must not be interpreted as support here.
 
-The upstream v0.6 beta and the required per-API installation designs are tracked in [compatibility expansion](docs/COMPATIBILITY_EXPANSION.md). Existing profiles remain pinned until the new motion-vector and transport paths pass complete game tests.
+The upstream v0.6 beta and the required per-API installation designs are tracked in [compatibility expansion](docs/COMPATIBILITY_EXPANSION.md). The current x64 manager path intentionally stays on the exact LaunchPad-based pair already confirmed working with MGS4 until a newer combination passes the same validation.
 
 ## Before you start
 
@@ -46,14 +46,23 @@ Do not use ReShade add-ons in online or anti-cheat protected games unless the ga
 
 | Component | Where to get it | What to select in the manager |
 | --- | --- | --- |
-| ReShade | [reshade.me](https://reshade.me) | Install manually with add-on support. The manager checks for `dxgi.dll` and `reshade-shaders`. |
-| DLSS5-Feeder | [Official repository](https://github.com/jlrouzies-fr/DLSS5-Feeder) | Nothing. The manager downloads and verifies the pinned release. |
+| ReShade | [reshade.me](https://reshade.me) | Install manually with add-on support. The manager checks for a ReShade proxy DLL and `reshade-shaders`. |
+| DLSS5-Feeder | [Official repository](https://github.com/jlrouzies-fr/DLSS5-Feeder) | Nothing. `dlss5-feed.addon64` and `DLSS5_Feed.fx` are embedded in the manager and verified before use. |
 | iMMERSE LaunchPad | [martymcmodding/iMMERSE](https://github.com/martymcmodding/iMMERSE) | The downloaded ZIP or `iMMERSE-main/Shaders/MartysMods_LAUNCHPAD.fx`. |
 | RenoDX DLSS 5 add-on | [RHI releases](https://github.com/RankFTW/RHI/releases) | Your local `renodx-dlss5*.addon64`. Its filename is preserved. |
 | DLSS Neural Rendering runtime | RHI | `nvngx_dlssnr.dll` |
 | DLSS Super Resolution runtime | An existing DLSS game or [DLSS Swapper](https://github.com/beeradmoore/dlss-swapper) | `nvngx_dlss.dll` |
 
-iMMERSE, RenoDX, NVIDIA runtimes, ReShade, and game files are not bundled. See [component sources and redistribution rules](docs/SOURCES.md).
+The embedded DLSS5-Feeder pair is MIT-licensed. iMMERSE, RenoDX, NVIDIA runtimes, ReShade, and game files are not bundled. See [component sources and redistribution rules](docs/SOURCES.md).
+
+## Embedded known-good Feeder pair
+
+The application carries these exact files:
+
+- `dlss5-feed.addon64` — SHA-256 `6ea59b3237ed9f1e2bdc6e258518347ccb7e03dfdc2f96fc08addc8974527dad`;
+- `DLSS5_Feed.fx` — SHA-256 `2dca9659c9e44ab05d29b2ebf20c5d6414c6de8b57f506bf4d52fa9c556a8943`.
+
+They are the pair used by the current LaunchPad-based path and confirmed in the working MGS4 setup. The installer no longer depends on an upstream GitHub release URL for these two files. It reconstructs/extracts them from the application, verifies the hashes above, and only then installs them.
 
 ## Install ReShade
 
@@ -61,7 +70,7 @@ iMMERSE, RenoDX, NVIDIA runtimes, ReShade, and game files are not bundled. See [
 - [ ] Run the ReShade installer and select the game's real executable.
 - [ ] Select Direct3D 10/11/12.
 - [ ] Use a ReShade build with add-on support and enable loading of add-ons.
-- [ ] Confirm that `dxgi.dll` is next to the game executable.
+- [ ] Confirm that the ReShade proxy DLL is next to the game executable.
 - [ ] Confirm that the `reshade-shaders` folder exists.
 - [ ] Launch the game once and verify that the ReShade overlay opens with Home.
 
@@ -77,7 +86,7 @@ iMMERSE, RenoDX, NVIDIA runtimes, ReShade, and game files are not bundled. See [
 - [ ] Close the game if it is running.
 - [ ] Click Install.
 
-The manager stores settings and its download cache in `%LocalAppData%/DLSS Feeder Manager`. Backups and the installation manifest are stored in `<game>/.dlss-feeder-manager`.
+The manager stores settings and the extracted/verified feeder cache in `%LocalAppData%/DLSS Feeder Manager`. Backups and the installation manifest are stored in `<game>/.dlss-feeder-manager`.
 
 ## Enable it in ReShade
 
@@ -107,16 +116,16 @@ New installations record hashes for managed files and backups. Removal stops bef
 
 - The application runs as the current Windows user and does not request administrator privileges.
 - Game changes are limited to the directory containing the selected executable.
-- Settings and downloaded feeder files are limited to the application's LocalAppData directory.
-- Downloaded DLSS5-Feeder assets are accepted only after SHA-256 verification.
+- Settings and the extracted feeder cache are limited to the application's LocalAppData directory.
+- Embedded DLSS5-Feeder files are accepted only after SHA-256 verification.
 - Do not grant `Everyone` full control over a game directory. If Windows denies access, fix the specific library or game-folder permission instead.
 
 ## Compatibility
 
 | Game | Result | Manager status |
 | --- | --- | --- |
-| Metal Gear Solid 4 | Runtime, removal, and reinstallation reported working | Profile implemented; validation record pending |
-| Dishonored: Death of the Outsider | D3D11 runtime, removal, and reinstallation reported working | Profile targets `Dishonored_DO.exe`; validation record pending |
+| Metal Gear Solid 4 | Runtime, removal, and reinstallation reported working | Profile pinned to the embedded known-good pair |
+| Dishonored: Death of the Outsider | D3D11 runtime, removal, and reinstallation reported working | Profile targets `Dishonored_DO.exe`; revalidation required after the embedded pin |
 
 Unlisted compatible games can use the generic mode. A game is marked verified only after installation, runtime-log validation, removal, and backup restoration all pass.
 
@@ -144,28 +153,31 @@ Launch the game, enable the required ReShade techniques and add-ons, enter gamep
 - [ ] Wait while the new executable and its SHA-256 file are downloaded from the official GitHub Release.
 - [ ] Allow the manager to restart.
 
-The updater is manual and never installs silently. It verifies the release SHA-256 before closing the current version, keeps the previous executable during the first launch, and restores it if the new build cannot finish starting. It updates only `DLSSFeederManager.exe`; game files and selected components are not changed.
+The updater is manual and never installs silently. It verifies the release SHA-256 before closing the current version, keeps the previous executable during the first launch, and restores it if the new build cannot finish starting.
+
+The Feeder pair is embedded inside `DLSSFeederManager.exe`, so updating the manager automatically brings the exact Feeder payload shipped with that version and the installer points directly to that embedded payload. Updating the manager does **not** silently rewrite an already-installed game; the new embedded files are applied on the next managed install/reinstall.
 
 If the executable is in a folder your Windows account cannot modify, move it to a user-owned folder before updating. The manager does not request administrator rights.
 
 ## Project status
 
 - [x] Generic Windows x64 installation core
-- [x] Pinned and verified DLSS5-Feeder downloads
+- [x] Known-good DLSS5-Feeder pair embedded and SHA-256 verified
+- [x] No runtime upstream download dependency for the pinned Feeder files
 - [x] Backup, rollback, validation, removal, and restoration
 - [x] MGS4 data-driven profile
 - [x] Death of the Outsider profile targeting `Dishonored_DO.exe`
 - [x] Verified, user-confirmed portable updater
 - [x] Complete removal and immediate reinstallation tests on both recorded games
-- [ ] Complete MGS4 manager test
+- [ ] Complete MGS4 manager test for the current build
 - [ ] Improve guided onboarding and diagnostics
-- [ ] Publish the first versioned GitHub Release
+- [ ] Publish the next versioned GitHub Release
 
 See the [v0.1.0 checklist](https://github.com/felipelacerda717/dlss-feeder-manager/issues/1), [v0.2.0 checklist](https://github.com/felipelacerda717/dlss-feeder-manager/issues/5), [maintainer safety checklist](docs/MAINTAINING.md), and [roadmap](docs/ROADMAP.md).
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE). The embedded DLSS5-Feeder files retain the upstream MIT notice documented in [component sources](docs/SOURCES.md).
 
 ## Disclaimer
 
