@@ -3,16 +3,16 @@
     {
       "id": "mgs4",
       "name": "Metal Gear Solid 4",
-      "status": "revalidation-required-v0.6-beta",
+      "status": "runtime-confirmed",
       "executables": ["mgs4.exe"],
-      "feederRelease": "0.6.0-beta.1"
+      "feederRelease": "0.1.0"
     },
     {
       "id": "death-of-the-outsider",
       "name": "Dishonored: Death of the Outsider",
-      "status": "revalidation-required-v0.6-beta",
+      "status": "revalidation-required-after-embedded-pin",
       "executables": ["Dishonored_DO.exe"],
-      "feederRelease": "0.6.0-beta.1"
+      "feederRelease": "0.1.0"
     }
   ]
 }
