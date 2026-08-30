@@ -14,4 +14,6 @@ public sealed class InstalledFile
     public string RelativePath { get; set; } = "";
     public bool HadOriginal { get; set; }
     public string? BackupRelativePath { get; set; }
+    public string? BackupSha256 { get; set; }
+    public string? InstalledSha256 { get; set; }
 }

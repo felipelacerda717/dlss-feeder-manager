@@ -134,6 +134,7 @@ public sealed class InstallationService
                     var backupPath = ResolveDestination(managerDirectory, entry.BackupRelativePath);
                     Directory.CreateDirectory(Path.GetDirectoryName(backupPath)!);
                     File.Copy(destination, backupPath, true);
+                    entry.BackupSha256 = await HashService.Sha256Async(backupPath, cancellationToken);
                 }
 
                 manifest.Files.Add(entry);
@@ -144,6 +145,8 @@ public sealed class InstallationService
                         destination,
                         StringComparison.OrdinalIgnoreCase))
                     File.Copy(operation.Source, destination, true);
+                entry.InstalledSha256 = await HashService.Sha256Async(destination, cancellationToken);
+                await SaveManifestAsync(GetManifestPath(gameDirectory), manifest, cancellationToken);
             }
 
             return OperationResult.Ok(
@@ -161,7 +164,7 @@ public sealed class InstallationService
         {
             try
             {
-                RestoreFiles(gameDirectory, manifest.Files);
+                await RestoreFilesAsync(gameDirectory, manifest.Files, CancellationToken.None);
                 TryDeleteDirectory(managerDirectory);
                 return OperationResult.Fail("Installation failed and changes were rolled back.", exception.Message);
             }
@@ -197,7 +200,13 @@ public sealed class InstallationService
                 cancellationToken)
                 ?? throw new InvalidDataException("The installation manifest is invalid.");
 
-            RestoreFiles(gameDirectory, manifest.Files);
+            var changed = await FindChangedFilesAsync(gameDirectory, manifest.Files, cancellationToken);
+            if (changed.Length > 0)
+                return OperationResult.Fail(
+                    "Removal stopped to protect files changed after installation.",
+                    changed.Select(path => $"Changed: {path}").ToArray());
+
+            await RestoreFilesAsync(gameDirectory, manifest.Files, cancellationToken);
             TryDeleteDirectory(Path.Combine(gameDirectory, ManagerDirectoryName));
             return OperationResult.Ok("The installation was removed and original files were restored.");
         }
@@ -235,6 +244,12 @@ public sealed class InstallationService
 
             if (missing.Length > 0)
                 return OperationResult.Fail("Installed files are missing.", missing);
+
+            var changed = await FindChangedFilesAsync(gameDirectory, manifest.Files, cancellationToken);
+            if (changed.Length > 0)
+                return OperationResult.Fail(
+                    "Managed files changed after installation.",
+                    changed.Select(path => $"Changed: {path}").ToArray());
 
             var details = new List<string> { $"{manifest.Files.Count} installed files found" };
             var feederLog = Path.Combine(gameDirectory, "dlss5-feed.log");
@@ -309,19 +324,33 @@ public sealed class InstallationService
             .ToList();
     }
 
-    private static void RestoreFiles(string gameDirectory, IEnumerable<InstalledFile> files)
+    private static async Task RestoreFilesAsync(
+        string gameDirectory,
+        IEnumerable<InstalledFile> files,
+        CancellationToken cancellationToken)
     {
         var managerDirectory = Path.Combine(gameDirectory, ManagerDirectoryName);
+        var installedFiles = files.ToArray();
 
-        foreach (var file in files.Reverse())
+        foreach (var file in installedFiles.Where(file => file.HadOriginal && file.BackupRelativePath is not null))
+        {
+            var backup = ResolveDestination(managerDirectory, file.BackupRelativePath!);
+            if (!File.Exists(backup))
+                throw new FileNotFoundException($"Backup not found for {file.RelativePath}.", backup);
+            if (file.BackupSha256 is not null
+                && !string.Equals(
+                    await HashService.Sha256Async(backup, cancellationToken),
+                    file.BackupSha256,
+                    StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException($"Backup verification failed for {file.RelativePath}.");
+        }
+
+        foreach (var file in installedFiles.Reverse())
         {
             var destination = ResolveDestination(gameDirectory, file.RelativePath);
             if (file.HadOriginal && file.BackupRelativePath is not null)
             {
                 var backup = ResolveDestination(managerDirectory, file.BackupRelativePath);
-                if (!File.Exists(backup))
-                    throw new FileNotFoundException($"Backup not found for {file.RelativePath}.", backup);
-
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
                 File.Copy(backup, destination, true);
             }
@@ -330,6 +359,29 @@ public sealed class InstallationService
                 File.Delete(destination);
             }
         }
+    }
+
+    private static async Task<string[]> FindChangedFilesAsync(
+        string gameDirectory,
+        IEnumerable<InstalledFile> files,
+        CancellationToken cancellationToken)
+    {
+        var changed = new List<string>();
+        foreach (var file in files)
+        {
+            if (file.InstalledSha256 is null)
+                continue;
+
+            var destination = ResolveDestination(gameDirectory, file.RelativePath);
+            if (!File.Exists(destination))
+                continue;
+
+            var hash = await HashService.Sha256Async(destination, cancellationToken);
+            if (!string.Equals(hash, file.InstalledSha256, StringComparison.OrdinalIgnoreCase))
+                changed.Add(file.RelativePath);
+        }
+
+        return changed.ToArray();
     }
 
     private static async Task SaveManifestAsync(
