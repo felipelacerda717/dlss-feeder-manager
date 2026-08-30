@@ -94,6 +94,9 @@ public partial class MainWindow : Window
     private void OpenDlssSwapper_Click(object sender, RoutedEventArgs e) =>
         OpenUrl("https://github.com/beeradmoore/dlss-swapper");
 
+    private void OpenProject_Click(object sender, RoutedEventArgs e) =>
+        OpenUrl("https://github.com/felipelacerda717/dlss-feeder-manager");
+
     private async void Check_Click(object sender, RoutedEventArgs e)
     {
         await SaveViewAsync();
@@ -161,8 +164,8 @@ public partial class MainWindow : Window
         var profile = _profiles.FindByExecutable(GameBox.Text);
         var release = _sources.GetFeederRelease(profile);
         ProfileText.Text = profile is null
-            ? $"Generic experimental mode · DLSS5-Feeder v{release.Version}"
-            : $"{profile.Name} · {profile.Status} · DLSS5-Feeder v{release.Version}";
+            ? $"Generic experimental mode · x64 D3D11/D3D12 only · DLSS5-Feeder v{release.Version}"
+            : $"{profile.Name} · {profile.Status} · x64 D3D11/D3D12 · DLSS5-Feeder v{release.Version}";
     }
 
     private void LoadSettingsIntoView()

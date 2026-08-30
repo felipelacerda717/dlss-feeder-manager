@@ -60,7 +60,7 @@ public sealed class InstallationService
                 errors.Add("The reshade-shaders directory was not found.");
 
             if (File.Exists(GetManifestPath(gameDirectory)))
-                errors.Add("This game already has an installation managed by this application.");
+                errors.Add("This game already has a managed installation. Click Remove to restore and clear it before installing again.");
         }
 
         ValidateFile(settings.RenoDxAddon, ".addon64", "Select the RenoDX DLSS 5 add-on.", errors);
@@ -84,7 +84,8 @@ public sealed class InstallationService
         return OperationResult.Ok(
             "Ready to install.",
             profile is null ? "Profile: Generic (experimental)" : $"Profile: {profile.Name}",
-            $"DLSS5-Feeder: v{release.Version}");
+            $"DLSS5-Feeder: v{release.Version}",
+            "Current manager path: 64-bit D3D11/D3D12. Native D3D9 is not supported.");
     }
 
     public async Task<OperationResult> InstallAsync(
@@ -165,8 +166,19 @@ public sealed class InstallationService
             try
             {
                 await RestoreFilesAsync(gameDirectory, manifest.Files, CancellationToken.None);
-                TryDeleteDirectory(managerDirectory);
-                return OperationResult.Fail("Installation failed and changes were rolled back.", exception.Message);
+                var cleanup = ClearManagerState(managerDirectory);
+                if (!cleanup.StateCleared)
+                    return OperationResult.Fail(
+                        "Installation failed. Files were restored, but the manager state could not be cleared.",
+                        exception.Message,
+                        cleanup.Detail!);
+
+                return cleanup.Detail is null
+                    ? OperationResult.Fail("Installation failed and changes were rolled back.", exception.Message)
+                    : OperationResult.Fail(
+                        "Installation failed and changes were rolled back.",
+                        exception.Message,
+                        cleanup.Detail);
             }
             catch (Exception rollbackException)
             {
@@ -193,12 +205,13 @@ public sealed class InstallationService
 
         try
         {
-            await using var stream = File.OpenRead(manifestPath);
-            var manifest = await JsonSerializer.DeserializeAsync<InstallManifest>(
-                stream,
-                JsonOptions,
-                cancellationToken)
-                ?? throw new InvalidDataException("The installation manifest is invalid.");
+            InstallManifest manifest;
+            await using (var stream = File.OpenRead(manifestPath))
+                manifest = await JsonSerializer.DeserializeAsync<InstallManifest>(
+                    stream,
+                    JsonOptions,
+                    cancellationToken)
+                    ?? throw new InvalidDataException("The installation manifest is invalid.");
 
             var changed = await FindChangedFilesAsync(gameDirectory, manifest.Files, cancellationToken);
             if (changed.Length > 0)
@@ -207,8 +220,17 @@ public sealed class InstallationService
                     changed.Select(path => $"Changed: {path}").ToArray());
 
             await RestoreFilesAsync(gameDirectory, manifest.Files, cancellationToken);
-            TryDeleteDirectory(Path.Combine(gameDirectory, ManagerDirectoryName));
-            return OperationResult.Ok("The installation was removed and original files were restored.");
+            var cleanup = ClearManagerState(Path.Combine(gameDirectory, ManagerDirectoryName));
+            if (!cleanup.StateCleared)
+                return OperationResult.Fail(
+                    "Original files were restored, but the manager state could not be cleared.",
+                    cleanup.Detail!);
+
+            return cleanup.Detail is null
+                ? OperationResult.Ok("The installation was removed and original files were restored.")
+                : OperationResult.Ok(
+                    "The installation was removed and original files were restored.",
+                    cleanup.Detail);
         }
         catch (Exception exception)
         {
@@ -452,15 +474,32 @@ public sealed class InstallationService
         return destination;
     }
 
-    private static void TryDeleteDirectory(string path)
+    private static (bool StateCleared, string? Detail) ClearManagerState(string managerDirectory)
     {
         try
         {
-            if (Directory.Exists(path))
-                Directory.Delete(path, true);
+            var manifestPath = Path.Combine(managerDirectory, ManifestFileName);
+            if (File.Exists(manifestPath))
+                File.Delete(manifestPath);
         }
-        catch
+        catch (Exception exception)
         {
+            return (
+                false,
+                $"Close the game and delete {Path.Combine(managerDirectory, ManifestFileName)} manually. {exception.Message}");
+        }
+
+        try
+        {
+            if (Directory.Exists(managerDirectory))
+                Directory.Delete(managerDirectory, true);
+            return (true, null);
+        }
+        catch (Exception exception)
+        {
+            return (
+                true,
+                $"Installation state was cleared, but the remaining folder could not be deleted: {managerDirectory}. {exception.Message}");
         }
     }
 
