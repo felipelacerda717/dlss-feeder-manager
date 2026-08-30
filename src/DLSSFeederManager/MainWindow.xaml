@@ -1,0 +1,116 @@
+<Window x:Class="DLSSFeederManager.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DLSS Feeder Manager"
+        Width="860"
+        Height="760"
+        MinWidth="760"
+        MinHeight="640"
+        WindowStartupLocation="CenterScreen">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid x:Name="ContentPanel" Margin="20">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+
+      <StackPanel Grid.Row="0" Margin="0,0,0,14">
+        <TextBlock FontSize="26" FontWeight="SemiBold" Text="DLSS Feeder Manager" />
+        <TextBlock Margin="0,4,0,0"
+                   Foreground="DimGray"
+                   Text="Verified profiles and an experimental generic mode for compatible 64-bit D3D11/D3D12 games." />
+      </StackPanel>
+
+      <GroupBox Grid.Row="1" Header="Game" Padding="10" Margin="0,0,0,12">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <TextBox x:Name="GameBox" Grid.Row="0" Grid.Column="0" IsReadOnly="True" />
+          <Button Grid.Row="0" Grid.Column="1" Content="Browse" Click="BrowseGame_Click" />
+          <TextBlock x:Name="ProfileText"
+                     Grid.Row="1"
+                     Grid.ColumnSpan="2"
+                     Margin="5,6,5,2"
+                     FontWeight="SemiBold"
+                     Text="No game selected" />
+        </Grid>
+      </GroupBox>
+
+      <GroupBox Grid.Row="2" Header="External components" Padding="10" Margin="0,0,0,12">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="170" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="RenoDX DLSS 5 add-on" />
+          <TextBox x:Name="RenoDxBox" Grid.Row="0" Grid.Column="1" IsReadOnly="True" />
+          <Button Grid.Row="0" Grid.Column="2" Content="Browse" Click="BrowseRenoDx_Click" />
+
+          <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="nvngx_dlss.dll" />
+          <TextBox x:Name="DlssBox" Grid.Row="1" Grid.Column="1" IsReadOnly="True" />
+          <Button Grid.Row="1" Grid.Column="2" Content="Browse" Click="BrowseDlss_Click" />
+
+          <TextBlock Grid.Row="2" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="nvngx_dlssnr.dll" />
+          <TextBox x:Name="DlssNrBox" Grid.Row="2" Grid.Column="1" IsReadOnly="True" />
+          <Button Grid.Row="2" Grid.Column="2" Content="Browse" Click="BrowseDlssNr_Click" />
+
+          <TextBlock Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="iMMERSE" />
+          <TextBox x:Name="ImmerseBox" Grid.Row="3" Grid.Column="1" IsReadOnly="True" />
+          <Button Grid.Row="3" Grid.Column="2" Content="Browse" Click="BrowseImmerse_Click" />
+
+          <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,6,0,0">
+            <Button Content="Open iMMERSE" Click="OpenImmerse_Click" />
+            <Button Content="Open RHI" Click="OpenRhi_Click" />
+            <Button Content="Open DLSS Swapper" Click="OpenDlssSwapper_Click" />
+          </StackPanel>
+
+          <TextBlock Grid.Row="5"
+                     Grid.ColumnSpan="3"
+                     Margin="5,7,5,2"
+                     Foreground="DimGray"
+                     TextWrapping="Wrap"
+                     Text="DLSS5-Feeder is downloaded from its official release. ReShade, iMMERSE, RenoDX, and NVIDIA runtime files are not bundled." />
+        </Grid>
+      </GroupBox>
+
+      <StackPanel x:Name="ActionPanel" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+        <Button Content="Check" Click="Check_Click" />
+        <Button Content="Install" Click="Install_Click" />
+        <Button Content="Validate" Click="Validate_Click" />
+        <Button Content="Remove" Click="Remove_Click" />
+      </StackPanel>
+
+      <GroupBox Grid.Row="4" Header="Status" Padding="10">
+        <StackPanel>
+          <TextBlock x:Name="StatusTitle" FontWeight="SemiBold" Text="Ready" />
+          <TextBox x:Name="StatusBox"
+                   Margin="0,8,0,0"
+                   MinHeight="120"
+                   IsReadOnly="True"
+                   AcceptsReturn="True"
+                   TextWrapping="Wrap"
+                   VerticalScrollBarVisibility="Auto" />
+        </StackPanel>
+      </GroupBox>
+    </Grid>
+  </ScrollViewer>
+</Window>
