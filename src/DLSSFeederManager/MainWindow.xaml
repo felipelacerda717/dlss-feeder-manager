@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="DLSS Feeder Manager"
         Width="860"
-        Height="760"
+        Height="820"
         MinWidth="760"
         MinHeight="640"
         WindowStartupLocation="CenterScreen">
@@ -48,11 +48,13 @@
       <GroupBox Grid.Row="2" Header="External components" Padding="10" Margin="0,0,0,12">
         <Grid>
           <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="170" />
+            <ColumnDefinition Width="200" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -73,19 +75,34 @@
           <TextBox x:Name="DlssNrBox" Grid.Row="2" Grid.Column="1" IsReadOnly="True" />
           <Button Grid.Row="2" Grid.Column="2" Content="Browse" Click="BrowseDlssNr_Click" />
 
-          <TextBlock Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="iMMERSE" />
+          <TextBlock Grid.Row="3" Grid.Column="0" Margin="5" VerticalAlignment="Center" Text="iMMERSE LaunchPad (required)" />
           <TextBox x:Name="ImmerseBox" Grid.Row="3" Grid.Column="1" IsReadOnly="True" />
           <Button Grid.Row="3" Grid.Column="2" Content="Browse" Click="BrowseImmerse_Click" />
 
-          <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,6,0,0">
-            <Button Content="Open iMMERSE" Click="OpenImmerse_Click" />
-            <Button Content="Open RHI" Click="OpenRhi_Click" />
+          <TextBlock Grid.Row="4"
+                     Grid.Column="1"
+                     Grid.ColumnSpan="2"
+                     Margin="5,2,5,5"
+                     Foreground="DimGray"
+                     TextWrapping="Wrap"
+                     Text="Select the downloaded ZIP or usually: iMMERSE-main\Shaders\MartysMods_LAUNCHPAD.fx" />
+
+          <StackPanel Grid.Row="5" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,6,0,0">
+            <Button Content="Download iMMERSE" Click="OpenImmerse_Click" />
+            <Button Content="Get RenoDX / DLSS NR (RHI)" Click="OpenRhi_Click" />
             <Button Content="Open DLSS Swapper" Click="OpenDlssSwapper_Click" />
           </StackPanel>
 
-          <TextBlock Grid.Row="5"
+          <TextBlock Grid.Row="6"
                      Grid.ColumnSpan="3"
-                     Margin="5,7,5,2"
+                     Margin="5,7,5,0"
+                     Foreground="DimGray"
+                     TextWrapping="Wrap"
+                     Text="RHI supplies the RenoDX DLSS 5 add-on and can deploy nvngx_dlssnr.dll. The selected add-on filename is preserved." />
+
+          <TextBlock Grid.Row="7"
+                     Grid.ColumnSpan="3"
+                     Margin="5,3,5,2"
                      Foreground="DimGray"
                      TextWrapping="Wrap"
                      Text="DLSS5-Feeder is downloaded from its official release. ReShade, iMMERSE, RenoDX, and NVIDIA runtime files are not bundled." />

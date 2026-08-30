@@ -2,7 +2,7 @@
 
 ## Status
 
-The manual setup was confirmed working on August 30, 2026. Manager support is not implemented yet.
+The manual setup was confirmed working on August 30, 2026. The manager profile is implemented, with installation and removal testing still pending.
 
 - Executable: `mgs4.exe`
 - Profile status: first verified target
@@ -40,12 +40,24 @@ The working setup uses `renodx-dlss5 (1).addon64`. The `(1)` suffix was added by
 1. Install ReShade with add-on support for Direct3D 10/11/12.
 2. Place `dlss5-feed.addon64` next to the game executable.
 3. Place `DLSS5_Feed.fx` in `reshade-shaders/Shaders`.
-4. Copy `MartysMods_LAUNCHPAD.fx` and the complete `MartysMods` folder into `reshade-shaders/Shaders`.
-5. Copy `iMMERSE_bluenoise_opt.png` into `reshade-shaders/Textures`.
-6. Place the selected RenoDX add-on, `nvngx_dlssnr.dll`, and `nvngx_dlss.dll` next to the game executable without renaming them.
-7. In ReShade, enable `MartysMods_Launchpad` and then `DLSS 5 Feed` below it.
-8. Enable neural rendering in the DLSS 5 Neural Rendering panel.
-9. Keep MSAA and SSAA disabled.
+4. Download iMMERSE with Code > Download ZIP. The LaunchPad shader is usually at `iMMERSE-main/Shaders/MartysMods_LAUNCHPAD.fx` after extraction.
+5. Copy `MartysMods_LAUNCHPAD.fx` and the complete `MartysMods` folder into `reshade-shaders/Shaders`.
+6. Copy `iMMERSE_bluenoise_opt.png` into `reshade-shaders/Textures`.
+7. Place the selected RenoDX add-on, `nvngx_dlssnr.dll`, and `nvngx_dlss.dll` next to the game executable without renaming them. RHI 2.4.4 or newer can obtain the add-on and deploy `nvngx_dlssnr.dll`.
+8. On the ReShade Home tab, enable `iMMERSE: Launchpad` and move it above `DLSS 5 Feed`.
+9. On the Add-ons tab, enable `DLSS 5 Feed` and `DLSS 5 Neural Rendering`.
+10. In the `DLSS 5 Neural Rendering` panel, enable `Enable DLSS Neural Rendering` and `Enable Upscaling`.
+11. Keep MSAA and SSAA disabled.
+
+## ReShade settings
+
+The Home tab must keep LaunchPad above the feeder:
+
+![ReShade Home with iMMERSE LaunchPad above DLSS 5 Feed](../images/mgs4-reshade-home.png)
+
+The Add-ons tab must have both add-ons and the two neural-rendering options enabled:
+
+![ReShade Add-ons with DLSS 5 Feed and DLSS 5 Neural Rendering enabled](../images/mgs4-reshade-addons.png)
 
 ## Validation
 
