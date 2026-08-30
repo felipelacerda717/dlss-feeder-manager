@@ -1,19 +1,17 @@
 {
-  "defaultFeederRelease": "0.6.0-beta.1",
+  "defaultFeederRelease": "0.1.0",
   "feederReleases": [
     {
-      "version": "0.6.0-beta.1",
+      "version": "0.1.0",
       "files": [
         {
           "name": "dlss5-feed.addon64",
-          "url": "https://github.com/jlrouzies-fr/DLSS5-Feeder/releases/download/v0.6.0-beta.1/dlss5-feed.addon64",
-          "sha256": "02d60691bf5c48ceb2bd93ac6b519e2d20fdc2df5c8b1ecec0622a842f9071b8",
+          "sha256": "6ea59b3237ed9f1e2bdc6e258518347ccb7e03dfdc2f96fc08addc8974527dad",
           "destination": "dlss5-feed.addon64"
         },
         {
           "name": "DLSS5_Feed.fx",
-          "url": "https://github.com/jlrouzies-fr/DLSS5-Feeder/releases/download/v0.6.0-beta.1/DLSS5_Feed.fx",
-          "sha256": "2233d2f04220e4b71832ed6a0a980f0646ac79966f064b10a0566b209fc44b72",
+          "sha256": "2dca9659c9e44ab05d29b2ebf20c5d6414c6de8b57f506bf4d52fa9c556a8943",
           "destination": "reshade-shaders/Shaders/DLSS5_Feed.fx"
         }
       ]
