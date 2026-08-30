@@ -24,6 +24,8 @@ The manager will:
 
 ReShade installation remains manual in the first release. Game files, RenoDX, NVIDIA runtimes, and iMMERSE are not bundled.
 
+See the [component acquisition policy](docs/SOURCES.md) for upstream repositories and download rules.
+
 ## Requirements
 
 - Windows;
