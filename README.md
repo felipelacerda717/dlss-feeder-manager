@@ -16,7 +16,17 @@ A portable Windows manager for installing, validating, and safely removing [DLSS
 - validates the installed layout and runtime logs;
 - removes managed files and restores verified backups.
 
-The initial scope is 64-bit Direct3D 11 and Direct3D 12 games. DirectX 9, DirectX 10, Vulkan, and 32-bit games are not supported by the manager yet.
+The current manager build installs only the tested 64-bit Direct3D 11 and Direct3D 12 path.
+
+| Graphics API | Current manager |
+| --- | --- |
+| Direct3D 11 | Supported |
+| Direct3D 12 | Supported |
+| Native Direct3D 9 | Not supported |
+| Direct3D 10 | Not supported |
+| Vulkan | Not supported |
+
+The latest upstream DLSS5-Feeder has separate beta paths for D3D9 through dgVoodoo2, Vulkan, and 32-bit games. This manager does not download or configure those newer paths yet, so their presence upstream must not be interpreted as support here.
 
 ## Before you start
 
@@ -104,9 +114,25 @@ New installations record hashes for managed files and backups. Removal stops bef
 | Game | Result | Manager status |
 | --- | --- | --- |
 | Metal Gear Solid 4 | Manual setup confirmed | Profile implemented; manager runtime and removal tests pending |
-| Dishonored | Generic setup reported working | Exact title, executable, API, validation, and removal test pending |
+| Dishonored: Death of the Outsider | Generic D3D11 setup reported working | Executable confirmation, validation record, and removal retest pending |
 
 Unlisted compatible games can use the generic mode. A game is marked verified only after installation, runtime-log validation, removal, and backup restoration all pass.
+
+## Troubleshooting
+
+### This game already has a managed installation
+
+Close the game and click Remove again. Older builds could restore the original files while leaving `<game>/.dlss-feeder-manager/install.json` open, which prevented the state directory from being deleted.
+
+The corrected build closes the manifest before cleanup and clears `install.json` separately. If Windows still blocks cleanup, keep the backup folder and rename `.dlss-feeder-manager` to `.dlss-feeder-manager.old` only after confirming that the original game files were restored.
+
+### Access denied
+
+Close the game, its launcher, ReShade tools, and any Explorer preview using the directory. Fix access only for the affected game library or folder. Do not grant `Everyone` full control and do not configure the manager to run permanently as administrator.
+
+### Validation is pending
+
+Launch the game, enable the required ReShade techniques and add-ons, enter gameplay for several frames, then click Validate again. File presence alone does not confirm that neural rendering ran.
 
 ## Updating
 
