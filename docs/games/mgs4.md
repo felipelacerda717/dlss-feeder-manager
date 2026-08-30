@@ -12,7 +12,7 @@ The test occurred before DLSS5-Feeder v0.2.0 was published. The MGS4 profile mus
 <game-dir>/
 ├── dxgi.dll
 ├── dlss5-feed.addon64
-├── renodx-dlss5.addon64
+├── renodx-dlss5 (1).addon64
 ├── nvngx_dlss.dll
 ├── nvngx_dlssnr.dll
 └── reshade-shaders/
@@ -28,7 +28,7 @@ ReShade creates its own configuration and log files. DLSS5-Feeder creates `dlss5
 
 The working installation screenshot shows the required feeder, RenoDX, LaunchPad, shader, and texture files. The `Lilium` folders and unrelated ReShade shaders visible in the screenshots are not DLSS5-Feeder requirements.
 
-A downloaded file such as `renodx-dlss5 (1).addon64` must be accepted as input but copied to the game directory as `renodx-dlss5.addon64`.
+The working setup uses `renodx-dlss5 (1).addon64`. The `(1)` suffix was added by Windows after a duplicate download and does not need to be removed. The manager must preserve the selected add-on filename.
 
 ## Manual procedure
 
@@ -37,7 +37,7 @@ A downloaded file such as `renodx-dlss5 (1).addon64` must be accepted as input b
 3. Place `DLSS5_Feed.fx` in `reshade-shaders/Shaders`.
 4. Copy `MartysMods_LAUNCHPAD.fx` and the complete `MartysMods` folder into `reshade-shaders/Shaders`.
 5. Copy `iMMERSE_bluenoise_opt.png` into `reshade-shaders/Textures`.
-6. Place `renodx-dlss5.addon64`, `nvngx_dlssnr.dll`, and `nvngx_dlss.dll` next to the game executable.
+6. Place the selected RenoDX add-on, `nvngx_dlssnr.dll`, and `nvngx_dlss.dll` next to the game executable without renaming them.
 7. In ReShade, enable `MartysMods_Launchpad` and then `DLSS 5 Feed` below it.
 8. Enable neural rendering in the DLSS 5 Neural Rendering panel.
 9. Keep MSAA and SSAA disabled.
