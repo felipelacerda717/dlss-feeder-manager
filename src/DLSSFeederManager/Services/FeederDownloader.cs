@@ -26,7 +26,13 @@ public sealed class FeederDownloader
             {
                 var temporaryPath = destination + ".download";
                 using var response = await Client.GetAsync(item.Url, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
-                response.EnsureSuccessStatusCode();
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new HttpRequestException(
+                        $"Failed to download DLSS5-Feeder v{release.Version} file {item.Name}. " +
+                        $"Upstream returned HTTP {(int)response.StatusCode} ({response.ReasonPhrase}). " +
+                        "The pinned release or asset may no longer be available.");
+                }
 
                 await using (var input = await response.Content.ReadAsStreamAsync(cancellationToken))
                 await using (var output = File.Create(temporaryPath))
