@@ -57,7 +57,7 @@ public sealed class InstallationService
                 errors.Add("ReShade was not found next to the game executable. Install ReShade with full add-on support for this game, then check again.");
 
             if (!Directory.Exists(Path.Combine(gameDirectory, "reshade-shaders")))
-                errors.Add("The reshade-shaders directory was not found.");
+                errors.Add("The reshade-shaders directory was not found. Reinstall ReShade for the selected executable, then check again.");
 
             if (File.Exists(GetManifestPath(gameDirectory)))
                 errors.Add("This game already has a managed installation. Click Remove to restore and clear it before installing again.");
@@ -265,13 +265,19 @@ public sealed class InstallationService
                 .ToArray();
 
             if (missing.Length > 0)
-                return OperationResult.Fail("Installed files are missing.", missing);
+                return OperationResult.Fail(
+                    "Installed files are missing.",
+                    missing.Select(path => $"Missing: {path}")
+                        .Append("Next: close the game, click Remove, then install again.")
+                        .ToArray());
 
             var changed = await FindChangedFilesAsync(gameDirectory, manifest.Files, cancellationToken);
             if (changed.Length > 0)
                 return OperationResult.Fail(
                     "Managed files changed after installation.",
-                    changed.Select(path => $"Changed: {path}").ToArray());
+                    changed.Select(path => $"Changed: {path}")
+                        .Append("Next: close the game and preserve any changes you need. Removal will remain blocked until these files match the installed versions.")
+                        .ToArray());
 
             var details = new List<string> { $"{manifest.Files.Count} installed files found" };
             var feederLog = Path.Combine(gameDirectory, "dlss5-feed.log");
@@ -279,7 +285,11 @@ public sealed class InstallationService
 
             if (!File.Exists(feederLog) || !File.Exists(reshadeLog))
             {
-                details.Add("Runtime validation pending: launch the game, then validate again.");
+                if (!File.Exists(feederLog))
+                    details.Add("dlss5-feed.log is missing. Launch the game and confirm DLSS 5 Feed is enabled in ReShade.");
+                if (!File.Exists(reshadeLog))
+                    details.Add("ReShade.log is missing. Confirm ReShade is installed for this executable and opens with Home.");
+                details.Add("Next: enter gameplay for several frames, close the game, then validate again.");
                 return OperationResult.Ok("The installed file layout is valid.", details.ToArray());
             }
 
@@ -293,9 +303,10 @@ public sealed class InstallationService
             if (!feederReady || !neuralReady)
             {
                 if (!feederReady)
-                    details.Add("DLSS5-Feeder runtime markers were not found in dlss5-feed.log.");
+                    details.Add("DLSS5-Feeder markers are missing. Enable the motion-vector provider above DLSS 5 Feed, disable MSAA/SSAA, and enter gameplay.");
                 if (!neuralReady)
-                    details.Add("Neural rendering markers were not found in ReShade.log.");
+                    details.Add("Neural rendering markers are missing. On Add-ons, enable DLSS 5 Feed and DLSS 5 Neural Rendering, then enable Neural Rendering and Upscaling.");
+                details.Add("Next: play for several frames, close the game, then validate again.");
                 return OperationResult.Fail("The runtime has not been validated.", details.ToArray());
             }
 

@@ -32,4 +32,6 @@
 - publish verified profiles contributed by the community;
 - retest profiles when upstream components change.
 
+The v0.6.0-beta.1 upstream release was evaluated on August 30, 2026. It changes the motion-vector setup and adds beta 32-bit, D3D9, and Vulkan paths, so existing profiles will remain pinned until each new layout is independently tested. See [compatibility expansion](COMPATIBILITY_EXPANSION.md).
+
 A profile will not be described as supported until its complete flow has been tested.
