@@ -114,7 +114,7 @@ New installations record hashes for managed files and backups. Removal stops bef
 | Game | Result | Manager status |
 | --- | --- | --- |
 | Metal Gear Solid 4 | Manual setup confirmed | Profile implemented; manager runtime and removal tests pending |
-| Dishonored: Death of the Outsider | Generic D3D11 setup reported working | Executable confirmation, validation record, and removal retest pending |
+| Dishonored: Death of the Outsider | D3D11 runtime reported working | Profile targets `Dishonored_DO.exe`; removal retest pending |
 
 Unlisted compatible games can use the generic mode. A game is marked verified only after installation, runtime-log validation, removal, and backup restoration all pass.
 
@@ -144,9 +144,9 @@ There is no self-updater yet. Test builds are currently produced by [GitHub Acti
 - [x] Pinned and verified DLSS5-Feeder downloads
 - [x] Backup, rollback, validation, removal, and restoration
 - [x] MGS4 data-driven profile
-- [x] Generic-mode success reported on Dishonored
+- [x] Death of the Outsider profile targeting `Dishonored_DO.exe`
 - [ ] Complete MGS4 manager test
-- [ ] Complete Dishonored identification and removal test
+- [ ] Complete Death of the Outsider removal and reinstall test
 - [ ] Improve guided onboarding and diagnostics
 - [ ] Publish versioned GitHub Releases
 - [ ] Add the portable self-updater

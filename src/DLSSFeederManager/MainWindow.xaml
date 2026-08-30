@@ -90,6 +90,7 @@
                      Text="Select the downloaded ZIP or usually: iMMERSE-main\Shaders\MartysMods_LAUNCHPAD.fx" />
 
           <StackPanel Grid.Row="5" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,6,0,0">
+            <Button Content="Open ReShade" Click="OpenReShade_Click" />
             <Button Content="Download iMMERSE" Click="OpenImmerse_Click" />
             <Button Content="Get RenoDX / DLSS NR (RHI)" Click="OpenRhi_Click" />
             <Button Content="Open DLSS Swapper" Click="OpenDlssSwapper_Click" />
