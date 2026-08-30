@@ -4,12 +4,17 @@
 
 The manual setup was confirmed working on August 30, 2026. Manager support is not implemented yet.
 
+- Executable: `mgs4.exe`
+- Profile status: first verified target
+- Feeder version: v0.1.0
+
 The test occurred before DLSS5-Feeder v0.2.0 was published. The MGS4 profile must therefore remain pinned to v0.1.0 until v0.2.0 is tested on the same installation.
 
 ## Required layout
 
 ```text
 <game-dir>/
+├── mgs4.exe
 ├── dxgi.dll
 ├── dlss5-feed.addon64
 ├── renodx-dlss5 (1).addon64
