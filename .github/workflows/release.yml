@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet restore DLSSFeederManager.sln
+      - run: dotnet publish src/DLSSFeederManager/DLSSFeederManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/win-x64 --no-restore
+      - name: Verify tag and prepare assets
+        shell: pwsh
+        run: |
+          $project = [xml](Get-Content src/DLSSFeederManager/DLSSFeederManager.csproj)
+          $version = $project.Project.PropertyGroup.Version
+          if ("v$version" -ne $env:GITHUB_REF_NAME) { throw "Tag $env:GITHUB_REF_NAME does not match project version $version" }
+          $path = 'artifacts/win-x64/DLSSFeederManager.exe'
+          $hash = (Get-FileHash $path -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  DLSSFeederManager.exe" | Set-Content "$path.sha256" -Encoding ascii -NoNewline
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $flags = @('--generate-notes')
+          if ($env:GITHUB_REF_NAME.Contains('-')) { $flags += '--prerelease' }
+          gh release create $env:GITHUB_REF_NAME artifacts/win-x64/DLSSFeederManager.exe artifacts/win-x64/DLSSFeederManager.exe.sha256 --title $env:GITHUB_REF_NAME @flags

@@ -37,8 +37,11 @@
 ## Publish a release
 
 - [ ] Update the application version.
-- [ ] Build from the protected `main` branch.
-- [ ] Verify the Windows executable SHA-256.
-- [ ] Publish the executable and checksum in the same GitHub Release.
+- [ ] Merge the version change into the protected `main` branch.
+- [ ] Create and push the matching tag, such as `v0.2.0-alpha.1`.
+- [ ] Confirm that the Release workflow succeeds.
+- [ ] Confirm that the GitHub Release contains `DLSSFeederManager.exe` and `DLSSFeederManager.exe.sha256`.
+- [ ] Verify the published Windows executable SHA-256.
+- [ ] Test **Check for updates** from the previous release.
 - [ ] Record third-party component versions used for verified profiles.
 - [ ] Keep iMMERSE, RenoDX, NVIDIA runtimes, ReShade, and game files out of the release.

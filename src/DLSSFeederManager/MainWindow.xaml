@@ -133,10 +133,11 @@
         </StackPanel>
       </GroupBox>
 
-      <Button Grid.Row="5"
-              HorizontalAlignment="Right"
-              Content="Open project on GitHub"
-              Click="OpenProject_Click" />
+      <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
+        <TextBlock x:Name="VersionText" Margin="0,0,10,0" VerticalAlignment="Center" Foreground="DimGray" />
+        <Button x:Name="UpdateButton" Content="Check for updates" Click="CheckUpdates_Click" />
+        <Button Content="Open project on GitHub" Click="OpenProject_Click" />
+      </StackPanel>
     </Grid>
   </ScrollViewer>
 </Window>
