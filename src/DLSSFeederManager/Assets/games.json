@@ -6,6 +6,13 @@
       "status": "manual-confirmed",
       "executables": ["mgs4.exe"],
       "feederRelease": "0.1.0"
+    },
+    {
+      "id": "death-of-the-outsider",
+      "name": "Dishonored: Death of the Outsider",
+      "status": "runtime-confirmed-removal-pending",
+      "executables": ["Dishonored_DO.exe"],
+      "feederRelease": "0.2.0"
     }
   ]
 }

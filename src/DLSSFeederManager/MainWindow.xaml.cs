@@ -88,6 +88,9 @@ public partial class MainWindow : Window
     private void OpenImmerse_Click(object sender, RoutedEventArgs e) =>
         OpenUrl("https://github.com/martymcmodding/iMMERSE");
 
+    private void OpenReShade_Click(object sender, RoutedEventArgs e) =>
+        OpenUrl("https://reshade.me");
+
     private void OpenRhi_Click(object sender, RoutedEventArgs e) =>
         OpenUrl("https://github.com/RankFTW/RHI/releases");
 
