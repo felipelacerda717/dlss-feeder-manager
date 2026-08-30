@@ -24,7 +24,7 @@
                    Text="Verified profiles and an experimental generic mode for compatible 64-bit D3D11/D3D12 games." />
       </StackPanel>
 
-      <GroupBox Grid.Row="1" Header="Game" Padding="10" Margin="0,0,0,12">
+      <GroupBox Grid.Row="1" Header="1. Select game" Padding="10" Margin="0,0,0,12">
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -45,7 +45,7 @@
         </Grid>
       </GroupBox>
 
-      <GroupBox Grid.Row="2" Header="External components" Padding="10" Margin="0,0,0,12">
+      <GroupBox Grid.Row="2" Header="2. Select required components" Padding="10" Margin="0,0,0,12">
         <Grid>
           <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200" />
@@ -105,18 +105,19 @@
                      Margin="5,3,5,2"
                      Foreground="DimGray"
                      TextWrapping="Wrap"
-                     Text="DLSS5-Feeder is downloaded from its official release. ReShade, iMMERSE, RenoDX, and NVIDIA runtime files are not bundled." />
+                     Text="DLSS5-Feeder is downloaded from its official release. ReShade, iMMERSE, RenoDX, and NVIDIA runtime files are not bundled. Close the game before Install or Remove. The manager does not request administrator rights." />
         </Grid>
       </GroupBox>
 
       <StackPanel x:Name="ActionPanel" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,12">
+        <TextBlock Margin="0,0,8,0" VerticalAlignment="Center" FontWeight="SemiBold" Text="3. Check and apply" />
         <Button Content="Check" Click="Check_Click" />
         <Button Content="Install" Click="Install_Click" />
         <Button Content="Validate" Click="Validate_Click" />
         <Button Content="Remove" Click="Remove_Click" />
       </StackPanel>
 
-      <GroupBox Grid.Row="4" Header="Status" Padding="10">
+      <GroupBox Grid.Row="4" Header="Result and next steps" Padding="10">
         <StackPanel>
           <TextBlock x:Name="StatusTitle" FontWeight="SemiBold" Text="Ready" />
           <TextBox x:Name="StatusBox"
