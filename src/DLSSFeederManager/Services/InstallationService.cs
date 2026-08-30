@@ -9,6 +9,16 @@ public sealed class InstallationService
     private const string ManagerDirectoryName = ".dlss-feeder-manager";
     private const string ManifestFileName = "install.json";
 
+    private static readonly string[] ReShadeProxyNames =
+    {
+        "dxgi.dll",
+        "d3d9.dll",
+        "d3d10.dll",
+        "d3d11.dll",
+        "d3d12.dll",
+        "opengl32.dll"
+    };
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -43,8 +53,8 @@ public sealed class InstallationService
         var gameDirectory = GetGameDirectory(settings.GameExecutable);
         if (gameDirectory is not null)
         {
-            if (!File.Exists(Path.Combine(gameDirectory, "dxgi.dll")))
-                errors.Add("ReShade with add-on support was not found next to the game executable.");
+            if (!HasReShadeProxyCandidate(gameDirectory))
+                errors.Add("ReShade was not found next to the game executable. Install ReShade with full add-on support for this game, then check again.");
 
             if (!Directory.Exists(Path.Combine(gameDirectory, "reshade-shaders")))
                 errors.Add("The reshade-shaders directory was not found.");
@@ -364,6 +374,9 @@ public sealed class InstallationService
         else if (!string.Equals(Path.GetFileName(path), expectedName, StringComparison.OrdinalIgnoreCase))
             errors.Add($"The selected file must be named {expectedName}.");
     }
+
+    private static bool HasReShadeProxyCandidate(string gameDirectory) =>
+        ReShadeProxyNames.Any(fileName => File.Exists(Path.Combine(gameDirectory, fileName)));
 
     private static string? GetGameDirectory(string gameExecutable)
     {
