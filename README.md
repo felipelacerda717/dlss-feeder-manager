@@ -113,8 +113,8 @@ New installations record hashes for managed files and backups. Removal stops bef
 
 | Game | Result | Manager status |
 | --- | --- | --- |
-| Metal Gear Solid 4 | Manual setup confirmed | Profile implemented; manager runtime and removal tests pending |
-| Dishonored: Death of the Outsider | D3D11 runtime reported working | Profile targets `Dishonored_DO.exe`; removal retest pending |
+| Metal Gear Solid 4 | Runtime, removal, and reinstallation reported working | Profile implemented; validation record pending |
+| Dishonored: Death of the Outsider | D3D11 runtime, removal, and reinstallation reported working | Profile targets `Dishonored_DO.exe`; validation record pending |
 
 Unlisted compatible games can use the generic mode. A game is marked verified only after installation, runtime-log validation, removal, and backup restoration all pass.
 
@@ -154,8 +154,8 @@ If the executable is in a folder your Windows account cannot modify, move it to 
 - [x] MGS4 data-driven profile
 - [x] Death of the Outsider profile targeting `Dishonored_DO.exe`
 - [x] Verified, user-confirmed portable updater
+- [x] Complete removal and immediate reinstallation tests on both recorded games
 - [ ] Complete MGS4 manager test
-- [ ] Complete Death of the Outsider removal and reinstall test
 - [ ] Improve guided onboarding and diagnostics
 - [ ] Publish the first versioned GitHub Release
 

@@ -57,4 +57,8 @@ jobs:
         run: |
           flags=(--generate-notes)
           if [[ "$GITHUB_REF_NAME" == *-* ]]; then flags+=(--prerelease); fi
-          gh release create "$GITHUB_REF_NAME" artifacts/DLSSFeederManager.exe artifacts/DLSSFeederManager.exe.sha256 --title "$GITHUB_REF_NAME" "${flags[@]}"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" artifacts/DLSSFeederManager.exe artifacts/DLSSFeederManager.exe.sha256 --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" artifacts/DLSSFeederManager.exe artifacts/DLSSFeederManager.exe.sha256 --title "$GITHUB_REF_NAME" "${flags[@]}"
+          fi
