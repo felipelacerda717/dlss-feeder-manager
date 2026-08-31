@@ -108,7 +108,7 @@
                      Margin="5,3,5,2"
                      Foreground="DimGray"
                      TextWrapping="Wrap"
-                     Text="DLSS5-Feeder is downloaded from its official release. ReShade, iMMERSE, RenoDX, and NVIDIA runtime files are not bundled. Close the game before Install or Remove. The manager does not request administrator rights." />
+                     Text="The tested DLSS5-Feeder pair is embedded and verified by the manager. ReShade, iMMERSE, RenoDX, and NVIDIA runtime files are not bundled. Close the game before Install, Validate, or Remove. Administrator rights are not required." />
         </Grid>
       </GroupBox>
 

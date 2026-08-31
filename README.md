@@ -141,9 +141,17 @@ The corrected build closes the manifest before cleanup and clears `install.json`
 
 Close the game, its launcher, ReShade tools, and any Explorer preview using the directory. Fix access only for the affected game library or folder. Do not grant `Everyone` full control and do not configure the manager to run permanently as administrator.
 
+If the denied path is `System Volume Information` or `Application Data`, keep the complete iMMERSE package in a normal folder such as Downloads and select its untouched ZIP. Do not place `MartysMods_LAUNCHPAD.fx` directly in a drive root or user-profile root. The manager does not need access to protected Windows folders.
+
+### iMMERSE package is incomplete
+
+Select the untouched ZIP downloaded from the official iMMERSE repository, or keep the extracted package structure unchanged. `MartysMods_LAUNCHPAD.fx` must remain inside `Shaders`, alongside `Shaders/MartysMods`, with `Textures/iMMERSE_bluenoise_opt.png` in the same package root.
+
 ### Validation is pending
 
-Launch the game, enable the required ReShade techniques and add-ons, enter gameplay for several frames, then click Validate again. File presence alone does not confirm that neural rendering ran.
+Validation does not configure ReShade. Confirm that `iMMERSE: Launchpad` and `DLSS 5 Feed` appear on Home, keep Launchpad above DLSS 5 Feed, enable the required add-ons and options, and enter gameplay for several frames. Close the game before clicking Validate. File presence alone does not confirm that neural rendering ran.
+
+If `DLSS 5 Feed` does not appear on Home, confirm that ReShade Effect Search Paths includes `.\\reshade-shaders\\Shaders\\**`, click Reload, and inspect the ReShade Log tab for shader errors. Preserve `ReShade.log` and `dlss5-feed.log` when requesting support.
 
 ## Updating
 

@@ -27,58 +27,113 @@ public sealed class ImmersePackage : IDisposable
         if (!File.Exists(sourcePath))
             throw new FileNotFoundException("iMMERSE source was not found.", sourcePath);
 
-        string searchRoot;
-        string? temporaryDirectory = null;
-
         if (string.Equals(Path.GetExtension(sourcePath), ".zip", StringComparison.OrdinalIgnoreCase))
         {
-            temporaryDirectory = Path.Combine(
+            var temporaryDirectory = Path.Combine(
                 Path.GetTempPath(),
                 "DLSSFeederManager",
                 Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(temporaryDirectory);
-            ZipFile.ExtractToDirectory(sourcePath, temporaryDirectory);
-            searchRoot = temporaryDirectory;
+            try
+            {
+                ZipFile.ExtractToDirectory(sourcePath, temporaryDirectory);
+                return OpenExtractedPackage(temporaryDirectory, temporaryDirectory);
+            }
+            catch
+            {
+                TryDeleteDirectory(temporaryDirectory);
+                throw;
+            }
         }
-        else
+
+        if (!string.Equals(
+                Path.GetFileName(sourcePath),
+                "MartysMods_LAUNCHPAD.fx",
+                StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("Select the complete iMMERSE ZIP or MartysMods_LAUNCHPAD.fx.");
+
+        var shadersDirectory = Path.GetDirectoryName(sourcePath)!;
+        if (!string.Equals(
+                Path.GetFileName(shadersDirectory),
+                "Shaders",
+                StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException(
+                "Keep MartysMods_LAUNCHPAD.fx inside the original iMMERSE Shaders folder, or select the complete ZIP.");
+
+        return OpenLayout(sourcePath, shadersDirectory, null);
+    }
+
+    private static ImmersePackage OpenExtractedPackage(string root, string temporaryDirectory)
+    {
+        var options = new EnumerationOptions
         {
-            if (!string.Equals(
-                    Path.GetFileName(sourcePath),
-                    "MartysMods_LAUNCHPAD.fx",
-                    StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException("Select the iMMERSE ZIP or MartysMods_LAUNCHPAD.fx.");
+            RecurseSubdirectories = true,
+            IgnoreInaccessible = true,
+            AttributesToSkip = FileAttributes.ReparsePoint
+        };
+        var launchPads = Directory.EnumerateFiles(root, "*", options)
+            .Where(path => string.Equals(
+                Path.GetFileName(path),
+                "MartysMods_LAUNCHPAD.fx",
+                StringComparison.OrdinalIgnoreCase))
+            .ToArray();
 
-            searchRoot = Directory.GetParent(Path.GetDirectoryName(sourcePath)!)?.FullName
-                ?? Path.GetDirectoryName(sourcePath)!;
+        if (launchPads.Length == 0)
+            throw new InvalidDataException(
+                "The selected ZIP does not contain Shaders\\MartysMods_LAUNCHPAD.fx.");
+
+        foreach (var launchPad in launchPads)
+        {
+            var shadersDirectory = Path.GetDirectoryName(launchPad)!;
+            if (!string.Equals(
+                    Path.GetFileName(shadersDirectory),
+                    "Shaders",
+                    StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            var packageRoot = Directory.GetParent(shadersDirectory)?.FullName;
+            if (packageRoot is null)
+                continue;
+
+            var martysMods = Path.Combine(shadersDirectory, "MartysMods");
+            var blueNoise = Path.Combine(packageRoot, "Textures", "iMMERSE_bluenoise_opt.png");
+            if (Directory.Exists(martysMods) && File.Exists(blueNoise))
+                return new ImmersePackage(launchPad, martysMods, blueNoise, temporaryDirectory);
         }
 
+        throw new InvalidDataException(
+            "The selected ZIP is incomplete. It must contain the original Shaders, Shaders\\MartysMods, and Textures folders.");
+    }
+
+    private static ImmersePackage OpenLayout(
+        string launchPad,
+        string shadersDirectory,
+        string? temporaryDirectory)
+    {
+        var martysMods = Path.Combine(shadersDirectory, "MartysMods");
+        if (!Directory.Exists(martysMods))
+            throw new InvalidDataException(
+                $"The iMMERSE folder is missing: {martysMods}");
+
+        var packageRoot = Directory.GetParent(shadersDirectory)?.FullName
+            ?? throw new InvalidDataException("The iMMERSE package root could not be determined.");
+        var blueNoise = Path.Combine(packageRoot, "Textures", "iMMERSE_bluenoise_opt.png");
+        if (!File.Exists(blueNoise))
+            throw new InvalidDataException(
+                $"The iMMERSE texture is missing: {blueNoise}");
+
+        return new ImmersePackage(launchPad, martysMods, blueNoise, temporaryDirectory);
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
         try
         {
-            var launchPad = Directory.EnumerateFiles(
-                    searchRoot,
-                    "MartysMods_LAUNCHPAD.fx",
-                    SearchOption.AllDirectories)
-                .FirstOrDefault()
-                ?? throw new InvalidDataException("MartysMods_LAUNCHPAD.fx was not found.");
-
-            var martysMods = Path.Combine(Path.GetDirectoryName(launchPad)!, "MartysMods");
-            if (!Directory.Exists(martysMods))
-                throw new InvalidDataException("The iMMERSE MartysMods directory was not found.");
-
-            var blueNoise = Directory.EnumerateFiles(
-                    searchRoot,
-                    "iMMERSE_bluenoise_opt.png",
-                    SearchOption.AllDirectories)
-                .FirstOrDefault()
-                ?? throw new InvalidDataException("iMMERSE_bluenoise_opt.png was not found.");
-
-            return new ImmersePackage(launchPad, martysMods, blueNoise, temporaryDirectory);
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
         }
         catch
         {
-            if (temporaryDirectory is not null)
-                Directory.Delete(temporaryDirectory, true);
-            throw;
         }
     }
 
@@ -87,12 +142,6 @@ public sealed class ImmersePackage : IDisposable
         if (_temporaryDirectory is null || !Directory.Exists(_temporaryDirectory))
             return;
 
-        try
-        {
-            Directory.Delete(_temporaryDirectory, true);
-        }
-        catch
-        {
-        }
+        TryDeleteDirectory(_temporaryDirectory);
     }
 }

@@ -303,11 +303,18 @@ public sealed class InstallationService
             if (!feederReady || !neuralReady)
             {
                 if (!feederReady)
-                    details.Add("DLSS5-Feeder markers are missing. Enable the motion-vector provider above DLSS 5 Feed, disable MSAA/SSAA, and enter gameplay.");
+                    details.Add("DLSS5-Feeder did not report a ready and delivered frame in dlss5-feed.log. This is runtime evidence, not a missing installed file.");
                 if (!neuralReady)
-                    details.Add("Neural rendering markers are missing. On Add-ons, enable DLSS 5 Feed and DLSS 5 Neural Rendering, then enable Neural Rendering and Upscaling.");
+                    details.Add("RenoDX did not report a successful Neural Rendering creation and evaluation in ReShade.log.");
+
+                details.AddRange(GetReShadeDiagnostics(gameDirectory, reshadeText));
+                details.Add("Confirm that iMMERSE: Launchpad and DLSS 5 Feed appear on Home, with Launchpad above DLSS 5 Feed.");
+                details.Add("On Add-ons, enable DLSS 5 Feed and DLSS 5 Neural Rendering, then enable Neural Rendering and Upscaling.");
+                details.Add("Keep MSAA and SSAA disabled.");
                 details.Add("Next: play for several frames, close the game, then validate again.");
-                return OperationResult.Fail("The runtime has not been validated.", details.ToArray());
+                return OperationResult.Fail(
+                    "The files are installed, but runtime activity was not confirmed.",
+                    details.ToArray());
             }
 
             details.Add("DLSS5-Feeder runtime confirmed");
@@ -438,6 +445,50 @@ public sealed class InstallationService
             FileShare.ReadWrite | FileShare.Delete);
         using var reader = new StreamReader(stream, Encoding.UTF8, true);
         return await reader.ReadToEndAsync(cancellationToken);
+    }
+
+    private static IReadOnlyList<string> GetReShadeDiagnostics(
+        string gameDirectory,
+        string reshadeText)
+    {
+        var diagnostics = new List<string>();
+        var errors = reshadeText
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(line =>
+                (line.Contains("DLSS5_Feed.fx", StringComparison.OrdinalIgnoreCase)
+                    || line.Contains("MartysMods_LAUNCHPAD.fx", StringComparison.OrdinalIgnoreCase))
+                && (line.Contains("error", StringComparison.OrdinalIgnoreCase)
+                    || line.Contains("failed", StringComparison.OrdinalIgnoreCase)))
+            .Select(line => line.Length > 300 ? line[..300] + "…" : line)
+            .Take(3)
+            .ToArray();
+
+        foreach (var error in errors)
+            diagnostics.Add($"ReShade shader error: {error}");
+
+        var reshadeIni = Path.Combine(gameDirectory, "ReShade.ini");
+        if (!File.Exists(reshadeIni))
+            return diagnostics;
+
+        string? effectSearchPaths = null;
+        try
+        {
+            effectSearchPaths = File.ReadLines(reshadeIni)
+                .Select(line => line.Trim())
+                .FirstOrDefault(line => line.StartsWith("EffectSearchPaths=", StringComparison.OrdinalIgnoreCase));
+        }
+        catch
+        {
+            return diagnostics;
+        }
+
+        if (effectSearchPaths is not null
+            && !effectSearchPaths.Replace('/', '\\').Contains(
+                "reshade-shaders\\Shaders",
+                StringComparison.OrdinalIgnoreCase))
+            diagnostics.Add("ReShade Effect Search Paths may not include .\\reshade-shaders\\Shaders\\**.");
+
+        return diagnostics;
     }
 
     private static void ValidateFile(
